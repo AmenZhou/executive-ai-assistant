@@ -81,7 +81,7 @@ Here is the email thread. Note that this is the full email thread. Pay special a
 
 async def draft_response(state: State, config: RunnableConfig, store: BaseStore):
     """Write an email to a customer."""
-    model = config["configurable"].get("model", "gpt-4o")
+    model = config["configurable"].get("model", "gpt-4.1-mini")
     llm = ChatOpenAI(
         model=model,
         temperature=0,

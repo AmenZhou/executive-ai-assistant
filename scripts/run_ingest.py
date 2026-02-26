@@ -12,6 +12,7 @@ import hashlib
 async def main(
     url: Optional[str] = None,
     minutes_since: int = 60,
+    minutes_until: int = 0,
     gmail_token: Optional[str] = None,
     gmail_secret: Optional[str] = None,
     early: bool = True,
@@ -35,6 +36,7 @@ async def main(
     async for email in fetch_group_emails(
         email_address,
         minutes_since=minutes_since,
+        minutes_until=minutes_until,
         gmail_token=gmail_token,
         gmail_secret=gmail_secret,
     ):
@@ -102,6 +104,12 @@ if __name__ == "__main__":
         help="Only process emails that are less than this many minutes old.",
     )
     parser.add_argument(
+        "--minutes-until",
+        type=int,
+        default=0,
+        help="Only process emails older than this many minutes. Use with --minutes-since for a time window.",
+    )
+    parser.add_argument(
         "--gmail-token",
         type=str,
         default=None,
@@ -125,6 +133,7 @@ if __name__ == "__main__":
         main(
             url=args.url,
             minutes_since=args.minutes_since,
+            minutes_until=args.minutes_until,
             gmail_token=args.gmail_token,
             gmail_secret=args.gmail_secret,
             early=bool(args.early),

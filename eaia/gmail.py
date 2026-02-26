@@ -54,10 +54,12 @@ async def get_credentials(
             user_id=user_email
         )
         
-        if auth_result.needs_auth:
-            print(f"Please visit: {auth_result.auth_url}")
+        if auth_result.token:
+            token = auth_result.token
+        elif auth_result.url:
+            print(f"Please visit: {auth_result.url}")
             print("Complete the OAuth flow and then retry.")
-            
+
             # Wait for completion outside of LangGraph context
             completed_result = await client.wait_for_completion(
                 auth_id=auth_result.auth_id,
@@ -65,8 +67,8 @@ async def get_credentials(
             )
             token = completed_result.token
         else:
-            token = auth_result.token
-        
+            raise ValueError("Authentication failed: no token or auth URL returned")
+
         if not token:
             raise ValueError("Failed to obtain access token")
         
@@ -124,23 +126,34 @@ def create_message(sender, to, subject, message_text, thread_id, original_messag
     return {"raw": raw, "threadId": thread_id}
 
 
+def _extract_email(s):
+    """Extract bare email address from a string like 'John Doe <john@example.com>'."""
+    parsed = email.utils.parseaddr(s.strip())
+    return parsed[1] if parsed[1] else s.strip()
+
+
 def get_recipients(
     headers,
     email_address,
     addn_receipients=None,
 ):
-    recipients = set(addn_receipients or [])
+    recipients = set(_extract_email(r) for r in (addn_receipients or []))
     sender = None
     for header in headers:
         if header["name"].lower() in ["to", "cc"]:
-            recipients.update(header["value"].replace(" ", "").split(","))
+            for addr in header["value"].split(","):
+                extracted = _extract_email(addr)
+                if extracted:
+                    recipients.add(extracted)
         if header["name"].lower() == "from":
-            sender = header["value"]
+            sender = _extract_email(header["value"])
     if sender:
-        recipients.add(sender)  # Ensure the original sender is included in the response
+        recipients.add(sender)
+    recipients.discard(email_address)
+    # Also remove any that still contain the user's email (edge cases)
     for r in list(recipients):
         if email_address in r:
-            recipients.remove(r)
+            recipients.discard(r)
     return list(recipients)
 
 
@@ -187,6 +200,7 @@ def send_email(
 async def fetch_group_emails(
     to_email,
     minutes_since: int = 30,
+    minutes_until: int = 0,
     gmail_token: str | None = None,
     gmail_secret: str | None = None,
 ) -> Iterable[EmailData]:
@@ -194,8 +208,10 @@ async def fetch_group_emails(
 
     service = build("gmail", "v1", credentials=creds)
     after = int((datetime.now() - timedelta(minutes=minutes_since)).timestamp())
-
     query = f"(to:{to_email} OR from:{to_email}) after:{after}"
+    if minutes_until > 0:
+        before = int((datetime.now() - timedelta(minutes=minutes_until)).timestamp())
+        query += f" before:{before}"
     messages = []
     nextPageToken = None
     # Fetch messages matching the query

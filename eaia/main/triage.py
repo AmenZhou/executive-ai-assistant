@@ -44,7 +44,7 @@ Subject: {subject}
 
 
 async def triage_input(state: State, config: RunnableConfig, store: BaseStore):
-    model = config["configurable"].get("model", "gpt-4o")
+    model = config["configurable"].get("model", "gpt-4.1-mini")
     llm = ChatOpenAI(model=model, temperature=0)
     examples = await get_few_shot_examples(state["email"], store, config)
     prompt_config = get_config(config)

@@ -20,8 +20,8 @@ pytz = "*"
 pyyaml = "*"
 python-dateutil = "^2.9.0.post0"
 python-dotenv = "^1.2.1"
-langgraph-cli = {extras = ["inmem"], version = "^0.3.8"}
-langgraph-api = "^0.2.134"
+langgraph-cli = {extras = ["inmem"], version = ">=0.4.0"}
+langgraph-api = ">=0.4.7"
 
 [tool.setuptools.packages.find]
 where = ["src"]
