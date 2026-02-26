@@ -7,8 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-langgraph = "^0.4.5"
-langgraph-checkpoint = "^2.0.0"
+langgraph = "^0.5.0"
+langgraph-checkpoint = "^4.0.0"
 langchain = "^0.3.9"
 langchain-openai = "^0.2"
 langchain-anthropic = "^0.3"
@@ -32,9 +32,9 @@ customer_support = ["*.txt", "*.rst"]
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"
 pytest-asyncio = "^0.23.6"
-pytest = "^8.2.0"
+pytest = "^8.4.2"
 pytest-watch = "^4.2.0"
-vcrpy = "^6.0.1"
+vcrpy = "^8.1.1"
 langgraph-cli = "^0.3.8"
 
 [build-system]
