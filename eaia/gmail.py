@@ -1,10 +1,23 @@
+import html
 import logging
+import re
 from datetime import datetime, timedelta, time
 from pathlib import Path
 from typing import Iterable
 import pytz
 import os
 import json
+
+MAX_EMAIL_CHARS = 12000  # ~3k tokens; keeps well under TPM limits
+
+
+def _strip_html(raw: str) -> str:
+    """Strip HTML tags and decode entities, collapse whitespace."""
+    text = re.sub(r"<[^>]+>", " ", raw)
+    text = html.unescape(text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 from dateutil import parser
 from google.oauth2.credentials import Credentials
@@ -90,11 +103,14 @@ def extract_message_part(msg):
     if msg["mimeType"] == "text/plain":
         body_data = msg.get("body", {}).get("data")
         if body_data:
-            return base64.urlsafe_b64decode(body_data).decode("utf-8")
+            text = base64.urlsafe_b64decode(body_data).decode("utf-8")
+            return text[:MAX_EMAIL_CHARS]
     elif msg["mimeType"] == "text/html":
         body_data = msg.get("body", {}).get("data")
         if body_data:
-            return base64.urlsafe_b64decode(body_data).decode("utf-8")
+            raw = base64.urlsafe_b64decode(body_data).decode("utf-8")
+            text = _strip_html(raw)
+            return text[:MAX_EMAIL_CHARS]
     if "parts" in msg:
         for part in msg["parts"]:
             body = extract_message_part(part)

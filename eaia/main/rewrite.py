@@ -32,7 +32,7 @@ Subject: {subject}
 
 async def rewrite(state: State, config, store):
     model = config["configurable"].get("model", "gpt-4.1-mini")
-    llm = ChatOpenAI(model=model, temperature=0)
+    llm = ChatOpenAI(model=model, temperature=0, max_retries=6)
     prev_message = state["messages"][-1]
     draft = prev_message.tool_calls[0]["args"]["content"]
     namespace = (config["configurable"].get("assistant_id", "default"),)

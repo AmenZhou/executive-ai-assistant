@@ -87,6 +87,7 @@ async def draft_response(state: State, config: RunnableConfig, store: BaseStore)
         temperature=0,
         parallel_tool_calls=False,
         tool_choice="required",
+        max_retries=6,
     )
     tools = [
         NewEmailDraft,

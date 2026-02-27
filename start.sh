@@ -23,18 +23,9 @@ for i in $(seq 1 30); do
     sleep 1
 done
 
-# Run ingestion for last 24 hours in 4 batches to avoid rate limits
-echo "📧 Ingesting emails: 24h ago to 18h ago..."
-python scripts/run_ingest.py --minutes-since 1440 --minutes-until 1080 --rerun 1 --early 0
-
-echo "📧 Ingesting emails: 18h ago to 12h ago..."
-python scripts/run_ingest.py --minutes-since 1080 --minutes-until 720 --rerun 1 --early 0
-
-echo "📧 Ingesting emails: 12h ago to 6h ago..."
-python scripts/run_ingest.py --minutes-since 720 --minutes-until 360 --rerun 1 --early 0
-
-echo "📧 Ingesting emails: 6h ago to now..."
-python scripts/run_ingest.py --minutes-since 360 --minutes-until 0 --rerun 1 --early 0
+# Run ingestion for last 24 hours in chunks with delay to avoid rate limits
+echo "📧 Ingesting emails for last 24 hours..."
+python scripts/run_ingest_24h.py --rerun 1 --early 0
 
 echo "✅ Done! Check Agent Inbox at https://dev.agentinbox.ai/"
 

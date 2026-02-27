@@ -24,6 +24,7 @@ triage_notify: |
   - Docusign things that need to be signed. These start with "Complete with Docusign". \
   Note: if the Docusign is already signed ("Completed: Complete with Docusign"), do NOT notify.
   - Emails where there is a clear action item from Haimeng based on a previous conversation
+  - Emails from Upwork that ask Haimeng a question or require his attention
 triage_email: |
   - Emails that explicitly ask Haimeng a question
   - Emails where someone is trying to set up a time to meet
